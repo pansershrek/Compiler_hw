@@ -18,7 +18,6 @@ double getExpr(char **rest);
 double getN(char **rest) {
     double ans = 0;
     notspace(rest);
-    //printf("In N %s\n", *rest);
     while ((**rest != '\0') && ((**rest >= '0') && (**rest <= '9'))) {
         ans = ans * 10 + (**rest - '0');
         (*rest)++;
@@ -36,7 +35,6 @@ double getN(char **rest) {
 
 double getTerm(char **rest) {
     notspace(rest);
-    //printf("In term %s\n", *rest);
     if (isnum(rest)) {
         return getN(rest);
     } else if ((**rest != '\0') && (**rest == '-')) {
@@ -57,7 +55,6 @@ double getTerm(char **rest) {
 
 double getProd(char **rest) {
     notspace(rest);
-    //printf("In prod %s\n", *rest);
     double lpart = getTerm(rest);
     notspace(rest);
     while ((**rest != '\0') && ((**rest == '*') || (**rest == '/'))) {
@@ -83,7 +80,6 @@ double getProd(char **rest) {
 
 double getExpr(char **rest) {
     notspace(rest);
-    //printf("In expr %s\n", *rest);
     double lpart = getProd(rest);
     notspace(rest);
     while ((**rest != '\0') && ((**rest == '+') || (**rest == '-'))) {
