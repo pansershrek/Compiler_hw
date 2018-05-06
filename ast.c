@@ -16,12 +16,14 @@ typedef struct node *tree;
 tree make_new() {
     tree node_new = (tree) malloc(sizeof(struct node));
     node_new->l = node_new->r = NULL;
+    node_new->val.oper = '\0';
     return node_new;
 }
 
 int islist(tree t) {
     return !(t->l || t->r);
 }
+
 
 double get_ans(double l, double r, char oper) {
     switch(oper) {
@@ -50,10 +52,38 @@ void calculate(tree t) {
     if (t->r) {
         calculate(t->r);
     }
-    if (islist(t->l) && islist(t->r)) {
+    if ((t->l) && (t->r) && islist(t->l) && islist(t->r)) {
         t->val.ans = get_ans(t->l->val.ans, t->r->val.ans, t->val.oper);
         erase(t->l);
         erase(t->r);
+    }
+}
+
+void print_debug(tree t) {
+    if (t->l) {
+        if (!islist(t->l)) {
+            printf("(");
+        }
+        print_debug(t->l);
+        if (!islist(t->l)) {
+            printf(")");
+        }
+    }
+    printf("LEVEL\n");
+    if ((t->l) || (t->r)) {
+        printf("%c", t->val.oper);
+    } else {
+        printf("%.10g", t->val.ans);
+    }
+    printf("\n");
+    if (t->r) {
+        if (!islist(t->r)) {
+            printf("(");
+        }
+        print_debug(t->r);
+        if (!islist(t->r)) {
+            printf(")");
+        }
     }
 }
 
@@ -197,7 +227,7 @@ int main(int argc, char *argv[]) {
         tree T = make_new();
         int f = getExpr(&str, T);
         if (f) {
-            printf("Bad expression\n");
+            printf("Bad gen tree\n");
             erase(T);
             return 0;
         }
@@ -212,24 +242,25 @@ int main(int argc, char *argv[]) {
         erase(T);
         fclose(file);
     } else if (argc == 2) {
-        printf("2 arg\n");
         char *str = argv[1];
         tree T = make_new();
         int f = getExpr(&str, T);
         if (f) {
-            printf("Bad expression\n");
+            printf("Bad gen tree\n");
             erase(T);
             return 0;
         }
         calculate(T);
         if (islist(T)) {
             if (T->val.ans == NAN) {
-                printf("Bad expression\n");
+                printf("Bad operators\n");
             } else {
                 printf("%.10g\n", T->val.ans);
             }
         } else {
-            printf("Bad expression\n");
+            print_debug(T);
+            fflush(stdout);
+            printf("Bad calculate expr\n");
         }
         erase(T);
     } else {
