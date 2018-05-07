@@ -144,6 +144,7 @@ int ast_getN(char **rest, tree *T) {
         (*rest)++;
     }
     if ((**rest != '\0') && (**rest == '.')) {
+        (*rest)++;
         double del = 10;
         while ((**rest != '\0') && ((**rest >= '0') && (**rest <= '9'))) {
             ans = ans + (**rest - '0') / del;
@@ -160,11 +161,15 @@ int ast_getTerm(char **rest, tree *T) {
     ast_notspace(rest);
     if (ast_isnum(rest)) {
         return ast_getN(rest, T);
-    } else if ((**rest != '\0') && (**rest == '-')) {
+    } else if ((**rest != '\0') && ((**rest == '-') || (**rest == '+'))) {
+        char oper = **rest;
         (*rest)++;
         (*T) = make_new();
         (*T)->l = make_new();
-        (*T)->l->val.ans = -1;
+        (*T)->l->val.ans = 1;
+        if (oper == '-') {
+            (*T)->l->val.ans = -1;
+        }
         (*T)->val.oper = '*';
         return ast_getTerm(rest, &(*T)->r);
     } else if ((**rest != '\0') && (**rest == '(')) {

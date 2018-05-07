@@ -22,6 +22,7 @@ double parser_getN(char **rest) {
         (*rest)++;
     }
     if ((**rest != '\0') && (**rest == '.')) {
+        (*rest)++;
         double del = 10;
         while ((**rest != '\0') && ((**rest >= '0') && (**rest <= '9'))) {
             ans = ans + (**rest - '0') / del;
@@ -36,9 +37,14 @@ double parser_getTerm(char **rest) {
     parser_notspace(rest);
     if (parser_isnum(rest)) {
         return parser_getN(rest);
-    } else if ((**rest != '\0') && (**rest == '-')) {
+    } else if ((**rest != '\0') && ((**rest == '-') || (**rest == '+'))) {
+        char oper = **rest;
         (*rest)++;
-        return -parser_getTerm(rest);
+        if (oper == '-') {
+            return -parser_getTerm(rest);
+        } else {
+            return parser_getTerm(rest);
+        }
     } else if ((**rest != '\0') && (**rest == '(')) {
         (*rest)++;
         double mid = parser_getExpr(rest);
