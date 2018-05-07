@@ -74,32 +74,6 @@ void calculate(tree *t) {
     }
 }
 
-void collapse(tree t) {
-    if (t->l) {
-        collapse(t->l);
-    }
-    if (t->r) {
-        collapse(t->r);
-    }
-    if (!fullnode(t)) {
-        if (t->val.oper == '#') {
-            if (t->l) {
-                tree mid = t->l;
-                t->val = mid->val;
-                t->l = mid->l;
-                t->r = mid->r;
-                free(mid);
-            } else if (t->r) {
-                tree mid = t->r;
-                t->val = mid->val;
-                t->l = mid->l;
-                t->r = mid->r;
-                free(mid);
-            }
-        }
-    }
-}
-
 void print_debug(tree t) {
     if (t->l) {
         if (!islist(t->l)) {
@@ -162,8 +136,8 @@ int isnum(char **rest) {
     notspace(rest);
     return (**rest != '\0' ) && ((**rest >= '0') && (**rest <= '9'));
 }
-int getExpr(char **rest, tree T);
-int getN(char **rest, tree T) {
+int getExpr(char **rest, tree *T);
+int getN(char **rest, tree *T) {
     double ans = 0;
     notspace(rest);
     while ((**rest != '\0') && ((**rest >= '0') && (**rest <= '9'))) {
@@ -178,22 +152,22 @@ int getN(char **rest, tree T) {
             (*rest)++;
         }
     }
-    T->val.ans = ans;
+    (*T) = make_new();
+    (*T)->val.ans = ans;
     return 0;
 }
 
-int getTerm(char **rest, tree T) {
+int getTerm(char **rest, tree *T) {
     notspace(rest);
     if (isnum(rest)) {
         return getN(rest, T);
     } else if ((**rest != '\0') && (**rest == '-')) {
         (*rest)++;
-        T->l = make_new();
-        T->l->val.ans = -1;
-        T->val.oper = '*';
-        T->r = make_new();
-        T = T->r;
-        return getTerm(rest, T);
+        (*T) = make_new();
+        (*T)->l = make_new();
+        (*T)->l->val.ans = -1;
+        (*T)->val.oper = '*';
+        return getTerm(rest, &(*T)->r);
     } else if ((**rest != '\0') && (**rest == '(')) {
         (*rest)++;
         int f = getExpr(rest, T);
@@ -210,67 +184,64 @@ int getTerm(char **rest, tree T) {
     }
 }
 
-int getProd(char **rest, tree T) {
+int getProd(char **rest, tree *T) {
     notspace(rest);
-    T->l = make_new();
-    int f = getTerm(rest, T->l);
+    tree tl = NULL;
+    int f = getTerm(rest, &tl);
     if (f) {
         return f;
     }
     notspace(rest);
     while ((**rest != '\0') && ((**rest == '*') || (**rest == '/'))) {
         char oper = (**rest);
-        T->val.oper = oper;
-        T->r = make_new();
-        T = T->r;
-        T->l = make_new();
         (*rest)++;
         notspace(rest);
-        f = getTerm(rest, T->l);
+        tree tr = NULL;
+        f = getTerm(rest, &tr);
+        tl = join(tl, tr, oper);
         if (f) {
             return f;
         }
         notspace(rest);
     }
+    (*T) = tl;
     return 0;
 }
 
-int getExpr(char **rest, tree T) {
+int getExpr(char **rest, tree *T) {
     notspace(rest);
-    T->l = make_new();
-    int f = getProd(rest, T->l);
+    tree tl = NULL;
+    int f = getProd(rest, &tl);
     if (f) {
         return f;
     }
     notspace(rest);
     while ((**rest != '\0') && ((**rest == '+') || (**rest == '-'))) {
         char oper = (**rest);
-        T->val.oper = oper;
-        T->r = make_new();
-        T = T->r;
-        T->l = make_new();
         (*rest)++;
         notspace(rest);
-        f = getProd(rest, T->l);
+        tree tr = NULL;
+        f = getProd(rest, &tr);
+        tl = join(tl, tr, oper);
         if (f) {
             return f;
         }
         notspace(rest);
     }
+    (*T) = tl;
     return 0;
 }
 
 int main(int argc, char *argv[]) {
     if (argc == 3) {
         char *str = argv[1];
-        tree T = make_new();
-        int f = getExpr(&str, T);
+        tree T = NULL;
+        int f = getExpr(&str, &T);
         if (f) {
             printf("Bad gen tree\n");
             erase(T);
             return 0;
         }
-        collapse(T);
         FILE *file = fopen(argv[2], "w");
         if (!file) {
             printf("Cant open file\n");
@@ -283,16 +254,13 @@ int main(int argc, char *argv[]) {
         fclose(file);
     } else if (argc == 2) {
         char *str = argv[1];
-        tree T = make_new();
-        int f = getExpr(&str, T);
+        tree T = NULL;
+        int f = getExpr(&str, &T);
         if (f) {
             printf("Bad gen tree\n");
             erase(T);
             return 0;
         }
-        collapse(T);
-        print_debug(T);
-        printf("\n");
         calculate(&T);
         if (islist(T)) {
             if (T->val.ans == NAN) {
