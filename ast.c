@@ -16,7 +16,15 @@ typedef struct node *tree;
 tree make_new() {
     tree node_new = (tree) malloc(sizeof(struct node));
     node_new->l = node_new->r = NULL;
-    node_new->val.oper = '\0';
+    node_new->val.oper = '#';
+    return node_new;
+}
+
+tree join(tree l, tree r, char oper) {
+    tree node_new = (tree) malloc(sizeof(struct node));
+    node_new->l = l;
+    node_new->r = r;
+    node_new->val.oper = oper;
     return node_new;
 }
 
@@ -24,6 +32,9 @@ int islist(tree t) {
     return !(t->l || t->r);
 }
 
+int fullnode(tree t) {
+    return (t->l && t->r);
+}
 
 double get_ans(double l, double r, char oper) {
     switch(oper) {
@@ -36,6 +47,9 @@ double get_ans(double l, double r, char oper) {
 }
 
 void erase(tree t) {
+    if (!t) {
+        return;
+    }
     if (t->l) {
         erase(t->l);
     }
@@ -45,17 +59,44 @@ void erase(tree t) {
     free(t);
 }
 
-void calculate(tree t) {
+void calculate(tree *t) {
+    if ((*t)->l) {
+        calculate(&(*t)->l);
+    }
+    if ((*t)->r) {
+        calculate(&(*t)->r);
+    }
+    if (((*t)->l) && ((*t)->r) && islist((*t)->l) && islist((*t)->r)) {
+        (*t)->val.ans = get_ans((*t)->l->val.ans, (*t)->r->val.ans, (*t)->val.oper);
+        free((*t)->l);
+        free((*t)->r);
+        (*t)->l = (*t)->r = NULL;
+    }
+}
+
+void collapse(tree t) {
     if (t->l) {
-        calculate(t->l);
+        collapse(t->l);
     }
     if (t->r) {
-        calculate(t->r);
+        collapse(t->r);
     }
-    if ((t->l) && (t->r) && islist(t->l) && islist(t->r)) {
-        t->val.ans = get_ans(t->l->val.ans, t->r->val.ans, t->val.oper);
-        erase(t->l);
-        erase(t->r);
+    if (!fullnode(t)) {
+        if (t->val.oper == '#') {
+            if (t->l) {
+                tree mid = t->l;
+                t->val = mid->val;
+                t->l = mid->l;
+                t->r = mid->r;
+                free(mid);
+            } else if (t->r) {
+                tree mid = t->r;
+                t->val = mid->val;
+                t->l = mid->l;
+                t->r = mid->r;
+                free(mid);
+            }
+        }
     }
 }
 
@@ -69,13 +110,11 @@ void print_debug(tree t) {
             printf(")");
         }
     }
-    printf("LEVEL\n");
     if ((t->l) || (t->r)) {
         printf("%c", t->val.oper);
     } else {
         printf("%.10g", t->val.ans);
     }
-    printf("\n");
     if (t->r) {
         if (!islist(t->r)) {
             printf("(");
@@ -231,6 +270,7 @@ int main(int argc, char *argv[]) {
             erase(T);
             return 0;
         }
+        collapse(T);
         FILE *file = fopen(argv[2], "w");
         if (!file) {
             printf("Cant open file\n");
@@ -250,7 +290,10 @@ int main(int argc, char *argv[]) {
             erase(T);
             return 0;
         }
-        calculate(T);
+        collapse(T);
+        print_debug(T);
+        printf("\n");
+        calculate(&T);
         if (islist(T)) {
             if (T->val.ans == NAN) {
                 printf("Bad operators\n");
@@ -258,8 +301,6 @@ int main(int argc, char *argv[]) {
                 printf("%.10g\n", T->val.ans);
             }
         } else {
-            print_debug(T);
-            fflush(stdout);
             printf("Bad calculate expr\n");
         }
         erase(T);
