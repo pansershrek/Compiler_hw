@@ -22,9 +22,10 @@ void erase(tree t);
 void calculate(tree *t);
 void print_debug(tree t);
 void print_file(tree t, FILE *file);
+
 void ast_notspace(char **rest);
 int ast_isnum(char **rest);
-int ast_getN(char **rest, tree *T);
-int ast_getTerm(char **rest, tree *T);
-int ast_getProd(char **rest, tree *T);
-int ast_getExpr(char **rest, tree *T);
+int ast_getN(char **rest, tree *T); // Return 1 if this expression is incorrect else return 0
+int ast_getTerm(char **rest, tree *T); // Return 1 if this expression is incorrect else return 0
+int ast_getProd(char **rest, tree *T); // Return 1 if this expression is incorrect else return 0
+int ast_getExpr(char **rest, tree *T); // Return 1 if this expression is incorrect else return 0

@@ -1,4 +1,6 @@
+#include <assert.h>
 #include "ast.h"
+
 
 tree make_new() {
     tree node_new = (tree) malloc(sizeof(struct node));
@@ -8,7 +10,7 @@ tree make_new() {
 }
 
 tree join(tree l, tree r, char oper) {
-    tree node_new = (tree) malloc(sizeof(struct node));
+    tree node_new = make_new();
     node_new->l = l;
     node_new->r = r;
     node_new->val.oper = oper;
@@ -51,6 +53,7 @@ void erase(tree t) {
 }
 
 void calculate(tree *t) {
+    assert(t);
     if ((*t)->l) {
         calculate(&(*t)->l);
     }
@@ -92,6 +95,7 @@ void print_debug(tree t) {
 }
 
 void print_file(tree t, FILE *file) {
+    assert(file);
     if (t->l) {
         if (!islist(t->l)) {
             fprintf(file, "(");
@@ -118,17 +122,24 @@ void print_file(tree t, FILE *file) {
 }
 
 void ast_notspace(char **rest) {
+    assert(rest);
+    assert(*rest);
     while ((**rest != '\0') && (isspace(**rest))) {
         ++(*rest);
     }
 }
 
 int ast_isnum(char **rest) {
+    assert(rest);
+    assert(*rest);
     ast_notspace(rest);
     return (**rest != '\0' ) && ((**rest >= '0') && (**rest <= '9'));
 }
 
 int ast_getN(char **rest, tree *T) {
+    assert(rest);
+    assert(*rest);
+    assert(T);
     double ans = 0;
     ast_notspace(rest);
     while ((**rest != '\0') && ((**rest >= '0') && (**rest <= '9'))) {
@@ -150,6 +161,9 @@ int ast_getN(char **rest, tree *T) {
 }
 
 int ast_getTerm(char **rest, tree *T) {
+    assert(rest);
+    assert(*rest);
+    assert(T);
     ast_notspace(rest);
     if (ast_isnum(rest)) {
         return ast_getN(rest, T);
@@ -177,6 +191,9 @@ int ast_getTerm(char **rest, tree *T) {
 }
 
 int ast_getProd(char **rest, tree *T) {
+    assert(rest);
+    assert(*rest);
+    assert(T);
     ast_notspace(rest);
     tree tl = NULL;
     int f = ast_getTerm(rest, &tl);
@@ -201,6 +218,9 @@ int ast_getProd(char **rest, tree *T) {
 }
 
 int ast_getExpr(char **rest, tree *T) {
+    assert(rest);
+    assert(*rest);
+    assert(T);
     ast_notspace(rest);
     tree tl = NULL;
     int f = ast_getProd(rest, &tl);

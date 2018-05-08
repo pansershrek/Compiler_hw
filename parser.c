@@ -12,7 +12,7 @@ int main(int argc, char *argv[]) {
         if (isnan(ans)) {
            printf("Bad expression\n");
         } else {
-            printf("%.10g\n", ans);
+            printf("Calculete %.10g\n", ans);
         }
     }
     return 0;

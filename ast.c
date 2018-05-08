@@ -37,7 +37,7 @@ int main(int argc, char *argv[]) {
                     if (isnan(T->val.ans)) {
                         printf("Bad operators\n");
                     } else {
-                        printf("%.10g\n", T->val.ans);
+                        printf("calculete %.10g\n", T->val.ans);
                     }
                 } else {
                     printf("Bad calculate expr\n");
