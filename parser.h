@@ -37,14 +37,9 @@ double parser_getTerm(char **rest) {
     parser_notspace(rest);
     if (parser_isnum(rest)) {
         return parser_getN(rest);
-    } else if ((**rest != '\0') && ((**rest == '-') || (**rest == '+'))) {
-        char oper = **rest;
+    } else if ((**rest != '\0') && (**rest == '-')) {
         (*rest)++;
-        if (oper == '-') {
-            return -parser_getTerm(rest);
-        } else {
-            return parser_getTerm(rest);
-        }
+        return -parser_getTerm(rest);
     } else if ((**rest != '\0') && (**rest == '(')) {
         (*rest)++;
         double mid = parser_getExpr(rest);
