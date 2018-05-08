@@ -1,9 +1,10 @@
 #include <stdio.h>
-#include "parser.h"
+#include "../parser.h"
 
-const int MAX_TEST = 5;
-char *tests[] = {"10+3*4", "-5+10000", "100*3+1/2", "100++1++2++3.14", "6/2/3"};
-double ans[] = {22, 9995, 300.5, 106.14, 1};
+const int MAX_TEST = 10;
+char *tests[] = {"8*8+8", "2+2*2", "100-100*3", "10+3*4", "(-5+10000)",
+"100*3+1/2", "100+3.14", "6/2/3", "-(-(-123))", "(1-2)*((2*(1-3)))"};
+double ans[] = {72, 6, -200, 22, 9995, 300.5, 103.14, 1, -123, 4};
 
 int main(int argc, char *argv[]) {
     printf("Begin pasrser tests\n");

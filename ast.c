@@ -1,46 +1,50 @@
 #include <stdio.h>
+#include <math.h>
 #include "ast.h"
 
+char buf[1001];
 int main(int argc, char *argv[]) {
-    if (argc == 3) {
-        char *str = argv[1];
-        tree T = NULL;
-        int f = ast_getExpr(&str, &T);
-        if (f) {
-            printf("Bad gen tree\n");
-            erase(T);
-            return 0;
-        }
-        FILE *file = fopen(argv[2], "w");
+    printf("Max length of input is 1000 symbols\n");
+    if (argc == 2) {
+        FILE *file = fopen(argv[1], "w");
         if (!file) {
             printf("Cant open file\n");
-            fclose(file);
-            erase(T);
             return 0;
         }
-        print_file(T, file);
-        erase(T);
-        fclose(file);
-    } else if (argc == 2) {
-        char *str = argv[1];
-        tree T = NULL;
-        int f = ast_getExpr(&str, &T);
-        if (f) {
-            printf("Bad gen tree\n");
-            erase(T);
-            return 0;
-        }
-        calculate(&T);
-        if (islist(T)) {
-            if (T->val.ans == NAN) {
-                printf("Bad operators\n");
+        while (fgets(buf, sizeof(buf), stdin)) {
+            char *str = buf;
+            tree T = NULL;
+            int f = ast_getExpr(&str, &T);
+            if (f) {
+                fprintf(file, "Bad gen tree\n");
             } else {
-                printf("%.10g\n", T->val.ans);
+                print_file(T, file);
+                fprintf(file, "\n");
             }
-        } else {
-            printf("Bad calculate expr\n");
+            erase(T);
         }
-        erase(T);
+        fclose(file);
+    } else if (argc == 1) {
+        while (fgets(buf, sizeof(buf), stdin)) {
+            char *str = buf;
+            tree T = NULL;
+            int f = ast_getExpr(&str, &T);
+            if (f) {
+                printf("Bad gen tree\n");
+            } else {
+                calculate(&T);
+                if (islist(T)) {
+                    if (isnan(T->val.ans)) {
+                        printf("Bad operators\n");
+                    } else {
+                        printf("%.10g\n", T->val.ans);
+                    }
+                } else {
+                    printf("Bad calculate expr\n");
+                }
+            }
+            erase(T);
+        }
     } else {
         printf("Bad argv\n");
     }

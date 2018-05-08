@@ -1,8 +1,6 @@
 parser:
-	gcc -o proj_parser -std=gnu11 parser.c
+	gcc -o proj_parser -std=gnu11 parser.c parser_func.c
 ast:
-	gcc -o proj_ast -std=gnu11 ast.c
-parser_test:
-	gcc -o parser_test -std=gnu11 parser_test.c
-ast_test:
-	gcc -o ast_test -std=gnu11 ast_test.c
+	gcc -o proj_ast -std=gnu11 ast.c ast_func.c
+clean:
+	rm proj_*
